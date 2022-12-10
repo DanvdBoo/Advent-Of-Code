@@ -15,6 +15,7 @@ def part2(s):
 
 
 DATA = get_data(day=DAY, year=YEAR)
+TESTDATA = open("testinput.txt", "r").read()
 part1(DATA)
 part2(DATA)
 
