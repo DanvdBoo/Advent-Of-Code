@@ -1,95 +1,58 @@
 from aocd import get_data
 from aocd import submit
-import math
+from heapq import heapify, heappop, heappush
 
 DAY = 19
 YEAR = 2022
-possible = [0]*25
+possible = [0]*33
 
 def initializePossible():
     global possible
-    temp = [0]*24
     currentGeode = 0
-    for i in range(24):
-        temp[i] = currentGeode + i
+    for i in range(33):
+        possible[i] = currentGeode + i
         currentGeode += i
-    for i, t in enumerate(temp):
-        possible[24 - i] = t
     return
 
-def canAfford(price, resources):
-    for i, resource in enumerate(resources):
-        if price[i] > resource:
-            return False
-    return True
-
-
-def resourceAvailable(price, robots):
-    for i, resource in enumerate(price):
-        if robots[i] == 0 and resource >= 1:
-            return False
-    return True
-
-
-def timeNeededForPurchase(price, robots, resources):
-    time = 0
-    for i, robot in enumerate(robots):
-        if price[i] >= 1:
-            if resources[i] >= price[i]:
-                continue
-            resourceNeeded = price[i] - resources[i]
-            timeNeeded = int(math.ceil(resourceNeeded/robot))
-            time = timeNeeded if timeNeeded > time else time
-    return time
-
-
-def recursiveCalculations(time, resources, robots, prices, currentMax, maxPrices):
-    if time > 24:
-        print("whoops")
-    if time == 24:
-        return resources[3]
-    newResources = [r + robots[i] for i, r in enumerate(resources)]
-
-    if possible[time] + newResources[3] + (robots[3] * 24-time) < currentMax:
-        return resources[3]
-
-    # don't do anything
-    timeLeft = 24-time
-    doNothingResources = [r + (timeLeft * robots[i])
-                          for i, r in enumerate(newResources)]
-    tempMax = doNothingResources[3] if doNothingResources[3] > currentMax else currentMax
-
-    if canAfford(prices[3], resources):
-        tmp = [0]*4
-        tmp[3] = 1
-        current = recursiveCalculations(
-                    time+1, [r - prices[3][j] for j, r in enumerate(newResources)], [r + tmp[j] for j, r in enumerate(robots)], prices, tempMax, maxPrices)
-        if current > tempMax:
-            tempMax = current
-    else:
-        # foreach robot add one
-        for i in reversed(range(4)):
-            if resourceAvailable(prices[i], robots):
-                if i != 3 and robots[i] + 1 > maxPrices[i]:
-                    continue
-                tmp = [0]*4
-                tmp[i] = 1
-                timeTillPurchase = timeNeededForPurchase(
-                    prices[i], robots, resources)
-                if time + timeTillPurchase + 1 > 24:
-                    continue
-                simulatedResources = [r + ((timeTillPurchase) * robots[i])
-                                    for i, r in enumerate(newResources)]
-                current = recursiveCalculations(
-                    time+timeTillPurchase+1, [r - prices[i][j] for j, r in enumerate(simulatedResources)], [r + tmp[j] for j, r in enumerate(robots)], prices, tempMax, maxPrices)
-                if current > tempMax:
-                    tempMax = current
-    return tempMax
+def solution(resources, robots, prices, maxPrices, end):
+    t, ore, clay, obsidian, geode = 0,0,0,0,0
+    queue = [(t, ore, clay, obsidian, geode, robots[0], robots[1], robots[2], robots[3])]
+    heapify(queue)
+    best = set()
+    while queue:
+        q = heappop(queue)
+        t, ore, clay, obsidian, geode, ore_bots, clay_bots, obsidian_bots, geode_bots = q
+        if t >= end:
+            best.add(geode)
+            continue
+        if possible[end - (t + 1)] + geode + (end-t) * geode_bots < max(best or [0]):
+            continue
+        best.add(geode)
+        ore_flag, clay_flag, obsidian_flag, geode_flag = False, False, False, False
+        for t in range(t, end):
+            best.add(geode)
+            if not ore_flag and ore >= (o := prices[0][0]) and ore_bots < maxPrices[0]:
+                heappush(queue, (t + 1, ore - o + ore_bots, clay + clay_bots, obsidian + obsidian_bots, geode + geode_bots, ore_bots + 1, clay_bots, obsidian_bots, geode_bots))
+                ore_flag = True
+            if not clay_flag and ore >= (o := prices[1][0]) and clay_bots < maxPrices[1]:
+                heappush(queue, (t + 1, ore - o + ore_bots, clay + clay_bots, obsidian + obsidian_bots, geode + geode_bots, ore_bots, clay_bots + 1, obsidian_bots, geode_bots))
+                clay_flag = True
+            if not obsidian_flag and ore >= (o := prices[2][0]) and clay >= (c := prices[2][1]) and obsidian_bots < maxPrices[2]:
+                heappush(queue, (t + 1, ore - o + ore_bots, clay - c + clay_bots, obsidian + obsidian_bots, geode + geode_bots, ore_bots, clay_bots, obsidian_bots + 1, geode_bots))
+                obsidian_flag = True
+            if not geode_flag and ore >= (o := prices[3][0]) and obsidian >= (ob := prices[3][2]):
+                heappush(queue, (t + 1, ore - o + ore_bots, clay + clay_bots, obsidian - ob + obsidian_bots, geode + geode_bots, ore_bots, clay_bots, obsidian_bots, geode_bots + 1))
+                geode_flag = True
+            ore += ore_bots
+            clay+= clay_bots
+            obsidian += obsidian_bots
+            geode += geode_bots
+    return max(best)
 
 
 def part1(s):
-    results = []
     initializePossible()
+    results = []
     for line in s.splitlines():
         numbers = [int(i) for i in line.split() if i.isdigit()]
         resources = [0, 0, 0, 0]
@@ -100,26 +63,45 @@ def part1(s):
         for price in prices:
             for i, p in enumerate(price):
                 maxPrices[i] = p if p > maxPrices[i] else maxPrices[i]
-        currentAnswer = recursiveCalculations(
-            1, resources, robots, prices, 0, maxPrices)
+        currentAnswer = solution(resources, robots, prices, maxPrices, 24)
         results.append(currentAnswer)
         print(len(results), currentAnswer)
     finalAnswer = 0
     for index, result in enumerate(results):
         finalAnswer += result * (index+1)
-    print(finalAnswer)
-    return
-    submit(result, part="a", day=DAY, year=YEAR)
+
+    submit(finalAnswer, part="a", day=DAY, year=YEAR)
 
 
 def part2(s):
-    return
-    submit(result, part="b", day=DAY, year=YEAR)
+    results = []
+    index = 0
+    for line in s.splitlines():
+        if index == 3:
+            break
+        numbers = [int(i) for i in line.split() if i.isdigit()]
+        resources = [0, 0, 0, 0]
+        robots = [1, 0, 0, 0]
+        prices = [[numbers[0], 0, 0, 0], [numbers[1], 0, 0, 0], [
+            numbers[2], numbers[3], 0, 0], [numbers[4], 0, numbers[5], 0]]
+        maxPrices = [0] * 4
+        for price in prices:
+            for i, p in enumerate(price):
+                maxPrices[i] = p if p > maxPrices[i] else maxPrices[i]
+        currentAnswer = solution(resources, robots, prices, maxPrices, 32)
+        results.append(currentAnswer)
+        print(len(results), currentAnswer)
+        index += 1
+    finalAnswer = 1
+    for index, result in enumerate(results):
+        finalAnswer *= result
+
+    submit(finalAnswer, part="b", day=DAY, year=YEAR)
 
 
 DATA = get_data(day=DAY, year=YEAR)
 TESTDATA = open("testinput.txt", "r").read()
-part1(TESTDATA)
+part1(DATA)
 part2(DATA)
 
 # lines = data.splitlines()
