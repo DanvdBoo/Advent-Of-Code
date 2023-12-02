@@ -2,14 +2,14 @@ from aocd import get_data
 from aocd import submit
 
 DAY = 1
-YEAR = 2022
+YEAR = 2023
 
-def part1(s):
+def part1(s: str):
     return
     submit(result, part="a", day=DAY, year=YEAR)
 
 
-def part2(s):
+def part2(s: str):
     return
     submit(result, part="b", day=DAY, year=YEAR)
 
