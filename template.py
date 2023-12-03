@@ -1,26 +1,11 @@
-from aocd import get_data
-from aocd import submit
-
-DAY = 1
-YEAR = 2023
+from .boilerPlate2023 import puzzle
 
 def part1(s: str):
-    return
-    submit(result, part="a", day=DAY, year=YEAR)
-
+    result = s
+    return result
 
 def part2(s: str):
-    return
-    submit(result, part="b", day=DAY, year=YEAR)
+    result = s
+    return result
 
-
-DATA = get_data(day=DAY, year=YEAR)
-TESTDATA = open("testinput.txt", "r").read()
-part1(DATA)
-part2(DATA)
-
-# lines = data.splitlines()
-#
-# # SOLUTION
-# for index, line in enumerate(lines):
-#     result = index
+puzzle(1, part1, part2, True, True).run()

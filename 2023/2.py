@@ -1,8 +1,4 @@
-from aocd import get_data
-from aocd import submit
-
-DAY = 2
-YEAR = 2023
+from .boilerPlate2023 import puzzle
 
 def part1(s: str):
     result = 0
@@ -18,7 +14,7 @@ def part1(s: str):
                 isAllowed = False
         if isAllowed:
             result += gameN
-    submit(result, part="a", day=DAY, year=YEAR)
+    return result
 
 
 def part2(s: str):
@@ -32,16 +28,6 @@ def part2(s: str):
             if max[color] < currentNumber:
                 max[color] = currentNumber
         result += max['blue'] * max['green'] * max['red']
-    submit(result, part="b", day=DAY, year=YEAR)
+    return result
 
-
-DATA = get_data(day=DAY, year=YEAR)
-TESTDATA = open("testinput.txt", "r").read()
-part1(DATA)
-part2(DATA)
-
-# lines = data.splitlines()
-#
-# # SOLUTION
-# for index, line in enumerate(lines):
-#     result = index
+puzzle(2, part1, part2, False, False).run()
