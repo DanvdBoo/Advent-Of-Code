@@ -10,7 +10,7 @@ class puzzle:
         self.part2 = part2
         self.test1 = test1
         self.test2 = test2
-    
+
     def run(self):
         data = get_data(day=self.day, year=self.year)
         testdata = open("testinput.txt", "r").read()
@@ -30,6 +30,6 @@ class puzzle:
         print("runtime: %s seconds" % (time.time() - start_time))
 
         if self.test2:
-            print("Result of part 1:", tmp)
+            print("Result of part 2:", tmp)
         else:
             submit(tmp, part="b", day=self.day, year=self.year)
