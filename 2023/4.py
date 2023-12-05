@@ -4,52 +4,25 @@ from .boilerPlate2023 import puzzle
 def part1(s: str):
     result = 0
     for line in s.splitlines():
-        cutLine = line.split(' ')
-        winningN = []
-        currentScore = 0
-        ownNumbers = False
-        for n in cutLine:
-            if n == 'Card' or n.count(':') >= 1 or n == '':
-                continue
-            if n == '|':
-                ownNumbers = True
-                continue
-            num = int(n)
-            if ownNumbers:
-                if num in winningN:
-                    if currentScore == 0:
-                        currentScore = 1
-                    else:
-                        currentScore *= 2
-            else:
-                winningN.append(num)
-        result += currentScore
+        cutLine = line.split(':')[1].split('|')
+        winningNumbers = set(int(x) for x in cutLine[0].split())
+        scratchNumbers = set(int(x) for x in cutLine[1].split())
+        result += round(2**(len(winningNumbers & scratchNumbers) - 1))
     return result
 
 
 def part2(s: str):
+    result = 0
     copies = [1 for s in s.splitlines()]
     for index, line in enumerate(s.splitlines()):
-        cutLine = line.split(' ')
-        winningN = []
-        count = 0
-        ownNumbers = False
-        for n in cutLine:
-            if n == 'Card' or n.count(':') >= 1 or n == '':
-                continue
-            if n == '|':
-                ownNumbers = True
-                continue
-            num = int(n)
-            if ownNumbers:
-                if num in winningN:
-                    count += 1
-            else:
-                winningN.append(num)
-        mult = copies[index]
-        for i in range(1, count + 1):
-            copies[index + i] += mult
-    return sum(copies)
+        cutLine = line.split(':')[1].split('|')
+        winningNumbers = set(int(x) for x in cutLine[0].split())
+        scratchNumbers = set(int(x) for x in cutLine[1].split())
+        matches = len(winningNumbers & scratchNumbers)
+        for i in range(1, matches + 1):
+            copies[index + i] += copies[index]
+        result += copies[index]
+    return result
 
 
 puzzle(4, part1, part2, False, False).run()
