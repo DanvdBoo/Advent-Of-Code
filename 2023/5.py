@@ -4,7 +4,6 @@ import copy
 def part1(s: str):
     maps = [g.split(':')[1].split() for g in s.split('\n\n')]
     seeds = [int(seed) for seed in maps[0]]
-    print(sum(seeds[::2]))
     for m in maps[1:]:
         m = [int(n) for n in m]
         for index, seed in enumerate(seeds):
@@ -19,7 +18,7 @@ def part2(s: str):
     for index, seed in enumerate(maps[0]):
         if index % 2 == 0:
             seeds.append((int(seed), int(maps[0][index + 1])))
-    print(seeds)
+
     for m in maps[1:]:  
         m = [int(n) for n in m]
         newSeeds = []

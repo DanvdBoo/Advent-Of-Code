@@ -18,7 +18,7 @@ class puzzle:
         print("----- PART 1 -----")
         start_time = time.time()
         tmp = self.part1(testdata if self.test1 else data)
-        print("runtime: %s seconds" % (time.time() - start_time))
+        print("runtime: %s ms" % ((time.time() - start_time) * 1000))
         if self.test1:
             print("Result of part 1:", tmp)
         else:
@@ -27,7 +27,7 @@ class puzzle:
         print("----- PART 2 -----")
         start_time = time.time()
         tmp = self.part2(testdata if self.test2 else data)
-        print("runtime: %s seconds" % (time.time() - start_time))
+        print("runtime: %s ms" % ((time.time() - start_time) * 1000))
 
         if self.test2:
             print("Result of part 2:", tmp)
