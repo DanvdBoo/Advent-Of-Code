@@ -1,117 +1,81 @@
-import math
+import regex as re
+import functools
 from .boilerPlate2023 import puzzle
 
 def part1(s: str):
-    def isValid(springs, control):
-        idx = 0
-        count = 0
-        for char in springs:
-            if char == '#':
-                count += 1
-            if char == '.':
-                if count != 0:
-                    if idx < len(control) and control[idx] == count:
-                        idx += 1
-                    else:
-                        return False
-                    count = 0
-        if count != 0:
-            if idx == len(control) - 1 and control[idx] == count:
-                return True
-            else:
-                return False
-        if idx == len(control):
-            return True
-        return False
+    return part2(s, 1)
 
-    def searchOld(springs: str, index: int, control):
-        if index == len(springs):
-            return 1 if isValid(springs, control) else 0
-        if springs[index] != '?':
-            return searchOld(springs, index + 1, control)
-        newSprings = springs
-        result = searchOld(newSprings.replace('?', '.', 1), index + 1, control)
-        result += searchOld(springs.replace('?', '#', 1), index + 1, control)
-        return result
+_reDot = re.compile(r'[^\.]')
+_reHash = re.compile(r'[^\#]')
+_reQuest = re.compile(r'[^\?]')
 
-    def search(springs: str, index: int, control, controlIndex: int, count: int):
-        if index == len(springs):
-            return 1 if controlIndex == len(control) or (controlIndex == len(control) - 1 and control[controlIndex] == count) else 0
-        if controlIndex == len(control):
-            return 1 if all([s == '.' or s == '?' for s in springs[index::]]) else 0
-        if springs[index] == '.':
-            if count > 0:
-                return search(springs, index + 1, control, controlIndex + 1, 0) if control[controlIndex] == count else 0
-            return search(springs, index + 1, control, controlIndex, 0)
-        if springs[index] == '#':
-            return search(springs, index + 1, control, controlIndex, count + 1) if control[controlIndex] > count else 0
-        
-        result = 0
-        result += search(springs.replace('?', '#', 1), index + 1, control, controlIndex, count + 1) if control[controlIndex] > count else 0
-        if count > 0:
-            result += search(springs.replace('?', '.', 1), index + 1, control, controlIndex + 1, 0) if control[controlIndex] == count else 0
-        else:
-            result += search(springs.replace('?', '.', 1), index + 1, control, controlIndex, 0)
-        return result
+def part2(s: str, x: int = 5):
+    @functools.cache
+    def search(springs: str, control: str):
+        if springs == '':
+            return 1 if control == '' else 0
+        if control == '':
+            return 1 if '#' not in springs else 0
 
-    result = 0
-    for line in s.splitlines():
-        springs = line.split()[0]
-        control = [int(x) for x in line.split()[1].split(',')]
-        result += search(springs, 0, control, 0, 0)
-        print(search(springs, 0, control, 0, 0), line)
-    return result
+        if springs[0] == '.':
+            noDotMatch = _reDot.search(springs[1::])
+            if not noDotMatch:
+                return 0
+            return search(springs[noDotMatch.start() + 1::], control)
 
-def part2(s: str):
-    def search(springs: str, index: int, control, controlIndex: int, count: int):
-        if index == len(springs):
-            return 1 if controlIndex == len(control) or (controlIndex == len(control) - 1 and control[controlIndex] == count) else 0
-        if controlIndex == len(control):
-            return 1 if all([s == '.' or s == '?' for s in springs[index::]]) else 0
-        if len(springs) - index < sum(control[controlIndex::]) - count:
+        controlNum = int(control.split(',')[0])
+        if controlNum > len(springs):
             return 0
-        if springs[index] == '.':
-            if count > 0:
-                return search(springs, index + 1, control, controlIndex + 1, 0) if control[controlIndex] == count else 0
-            return search(springs, index + 1, control, controlIndex, 0)
-        if springs[index] == '#':
-            return search(springs, index + 1, control, controlIndex, count + 1) if control[controlIndex] > count else 0
+
+        if springs[0] == '#':
+            noHashMatch = _reHash.search(springs[1::])
+            if not noHashMatch:
+                return 1 if len(springs) == controlNum and control.partition(',')[2] == '' else 0
+            elif noHashMatch.start() + 1 > controlNum:
+                return 0
+            elif noHashMatch.start() + 1 == controlNum == springs.find('.'):
+                return search(springs[controlNum + 1::], control.partition(',')[2])
+            else:
+                if '.' in springs[0:controlNum]:
+                    return 0
+                else:
+                    if len(springs) == controlNum:
+                        return 1 if control.partition(',')[2] == '' else 0
+                    return search(springs[controlNum + 1::], control.partition(',')[2]) if springs[controlNum] != '#' else 0
         
-        result = 0
-        result += search(springs.replace('?', '#', 1), index + 1, control, controlIndex, count + 1) if control[controlIndex] > count else 0
-        if count > 0:
-            result += search(springs.replace('?', '.', 1), index + 1, control, controlIndex + 1, 0) if control[controlIndex] == count else 0
-        else:
-            result += search(springs.replace('?', '.', 1), index + 1, control, controlIndex, 0)
-        return result
+        res = 0
+        if springs[0] == '?':
+            noQuestMatch = _reQuest.search(springs[1::])
+            if not noQuestMatch:
+                if sum([int(num) + 1 for num in control.split(',')]) - 1 > len(springs):
+                    return 0
+                res += search(springs[controlNum + 1::], control.partition(',')[2])
+            elif noQuestMatch.start() + 1 > controlNum:
+                res += search(springs[controlNum + 1::], control.partition(',')[2])
+            elif noQuestMatch.start() + 1 == controlNum:
+                if springs[controlNum] != '#':
+                    res += search(springs[controlNum + 1::], control.partition(',')[2])
+            elif noQuestMatch.start() + 1 < controlNum:
+                if '.' in springs[0:controlNum]:
+                    part = springs.partition('.')
+                    if '#' in part[0]:
+                        return 0
+                    return search(part[2], control)
+                else:
+                    if len(springs) == controlNum:
+                        res += 1 if control.partition(',')[2] == '' else 0
+                    else:
+                        res += search(springs[controlNum + 1::], control.partition(',')[2]) if springs[controlNum] != '#' else 0
+            res += search(springs[1::], control)
+        return res
 
     result = 0
     for line in s.splitlines():
-        springs = ((line.split()[0] + '?'))[:-1]
-        control = [int(x) for x in line.split()[1].split(',')]
-        tmp1x = search(springs, 0, control, 0, 0)
+        springs = ((line.split()[0] + '?') * x)[:-1]
+        control = ((line.split()[1] + ',') * x)[:-1]
+        tmp = search(springs, control)
 
-        springs = ((line.split()[0] + '?') * 2)[:-1]
-        control = [int(x) for x in line.split()[1].split(',')] * 2
-        tmp2x = search(springs, 0, control, 0, 0)
-
-        springs = ((line.split()[0] + '?') * 3)[:-1]
-        control = [int(x) for x in line.split()[1].split(',')] * 3
-        tmp3x = search(springs, 0, control, 0, 0)
-
-        springs = ((line.split()[0] + '?') * 4)[:-1]
-        control = [int(x) for x in line.split()[1].split(',')] * 4
-        tmp4x = search(springs, 0, control, 0, 0)
-
-        springs = ((line.split()[0] + '?') * 5)[:-1]
-        control = [int(x) for x in line.split()[1].split(',')] * 5
-        tmp5x = search(springs, 0, control, 0, 0)
-
-        print(tmp1x, tmp2x, tmp3x, tmp4x, tmp5x, math.floor(tmp2x/tmp1x), math.ceil(tmp2x/tmp1x))
-        if math.floor(tmp2x/tmp1x) != math.ceil(tmp2x/tmp1x):
-            print(line, '---', tmp1x, tmp2x, math.floor(tmp2x/tmp1x), math.ceil(tmp2x/tmp1x))
-        result += pow(math.ceil(tmp2x/tmp1x), 4) * tmp1x
-        break
+        result += tmp
     return result
 
-puzzle(12, part1, part2, True, True).run()
+puzzle(12, part1, part2, False, False).run()
