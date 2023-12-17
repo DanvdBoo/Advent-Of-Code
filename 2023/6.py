@@ -1,3 +1,4 @@
+import math
 from .boilerPlate2023 import puzzle
 
 def part1(s: str):
@@ -21,13 +22,18 @@ def part2(s: str):
     lines = s.splitlines()
     time = int(lines[0].split(':')[1].replace(' ',''))
     distance = int(lines[1].split(':')[1].replace(' ',''))
-    result, speed, timeLeft = 0, 0, time
-    for i in range(time):
-        if speed * timeLeft > distance:
-            result = i
-            break
-        speed += 1
-        timeLeft -= 1
-    return time - (2 * result) + 1
+    minTime = 0
+    maxTime = math.ceil(time/2)
+    while minTime != maxTime:
+        t = math.ceil((minTime + maxTime) / 2)
+        if t == minTime or t == maxTime:
+            return time - (2*t) + 1
+        if t * (time - t) > distance:
+            maxTime = t
+        elif t * (time - t) < distance:
+            minTime = t
+        else:
+            return time - (2*t) + 1
+    return -1
 
 puzzle(6, part1, part2, False, False).run()

@@ -43,8 +43,6 @@ def part2(s: str):
                 for char in row:
                     if char == 'O':
                         result += len(finalGrid) - iRow
-            for line in finalGrid:
-                print(*line)
             break
         grids.append(stringifyGrid)
         cycle += 1
