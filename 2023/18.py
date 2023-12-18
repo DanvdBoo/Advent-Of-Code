@@ -1,41 +1,42 @@
 from .boilerPlate2023 import puzzle
 
+def calcArea(points):
+    res = 0
+    for i in range(len(points) - 1):
+        x1, y1 = points[i]
+        x2, y2 = points[i + 1]
+        res += x1 * y2 - x2 * y1
+    return abs(res) // 2
+
+
 def part1(s: str):
-    # grid2 = [[1e4, -1e4] for _ in range(1000)]
-    grid2 = {0: [1e4, -1e4]}
-    r, c = 0, 0
-    maxD, maxU = 0 ,0
+    DIRECTION = {"U": (0, -1), "D": (0, 1), "L": (-1, 0), "R": (1, 0)}
+    omtrek = 0
+    points = [(0, 0)]
+
     for line in s.splitlines():
-        d, l, color = line.split()
-        color = color.replace('(','').replace(')','')
-        if d == 'R':
-            c += int(l)
-            grid2[r][1] = max(grid2[r][1], c)
-        elif d == 'L':
-            c -= int(l)
-            grid2[r][0] = min(grid2[r][0], c)
-        if d == 'D':
-            for i in range(1, int(l) + 1):
-                if not r+i in grid2:
-                    grid2.update([(r+i, [c, c])])
-                grid2[r+i][0] = min(grid2[r+i][0], c)
-                grid2[r+i][1] = max(grid2[r+i][1], c)
-            r += int(l)
-        elif d == 'U':
-            for i in range(1, int(l) + 1):
-                if r-i not in grid2:
-                    grid2.update([(r-i, [c, c])])
-                grid2[r-i][0] = min(grid2[r-i][0], c)
-                grid2[r-i][1] = max(grid2[r-i][1], c)
-            r -= int(l)
-    result = 0
-    for _, [minC, maxC] in grid2.items():
-        if minC != 1e4 and maxC != -1e4:
-            result += maxC - minC + 1
-    return result
+        d, l, c = line.split()
+        l, c = int(l), c[2:-1]
+
+        omtrek += l
+
+        points.append((points[-1][0] + l * DIRECTION[d][0], points[-1][1] + l * DIRECTION[d][1]))
+    
+    return calcArea(points) + omtrek // 2 + 1
 
 def part2(s: str):
-    result = s
-    return 0
+    DIRECTION = {'3': (0, -1), '1': (0, 1), '2': (-1, 0), '0': (1, 0)}
+    omtrek = 0
+    points = [(0, 0)]
 
-puzzle(18, part1, part2, False, True).run()
+    for line in s.splitlines():
+        _, _, c = line.split()
+        l, d = int(c[2:-2], 16), c[-2]
+
+        omtrek += l
+
+        points.append((points[-1][0] + l * DIRECTION[d][0], points[-1][1] + l * DIRECTION[d][1]))
+    
+    return calcArea(points) + omtrek // 2 + 1
+
+puzzle(18, part1, part2, False, False).run()
