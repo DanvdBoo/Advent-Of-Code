@@ -1,3 +1,4 @@
+import math
 from .boilerPlate2023 import puzzle
 import json
 
@@ -52,8 +53,7 @@ def part1(s: str):
         if stringifiedDict in history:
             print(history[stringifiedDict])
             print(repeats)
-            # return (countHigh * round(1000/(repeats + 1))) * (countLow * round(1000/(repeats + 1)))
-            return 0
+            return (countHigh * round(1000/(repeats + 1))) * (countLow * round(1000/(repeats + 1)))
         history[stringifiedDict] = (repeats + 1, countLow, countHigh)
     totalCountLow, totalCountHigh = 0, 0
     for _, (_, low, high) in history.items():
@@ -77,8 +77,9 @@ def part2(s: str):
             for k, n in nodes.items():
                 if key in n["t"]:
                     node["hist"].append((k, 0))
-    repeats = 0
-    while True:
+    repeats = [0, 0, 0, 0]
+    count = 0
+    while min(repeats) == 0:
         signals = [("broadcaster", 0, "button")]
         rxSigs = []
         while signals:
@@ -103,10 +104,21 @@ def part2(s: str):
                     newSig = 0 if allHigh else 1
                 for target in n["t"]:
                     signals.append((target, newSig, t))
+                    if target == "hp" and newSig == 1:
+                        if t == "sr":
+                            repeats[0] = count + 1
+                        elif t == "sn":
+                            repeats[1] = count + 1
+                        elif t == "rf":
+                            repeats[2] = count + 1
+                        elif t == "vq":
+                            repeats[3] = count + 1
             elif t == "rx":
                 rxSigs.append(sig)
         if len(rxSigs) == 1 and rxSigs[0] == 0:
             return repeats
-        repeats += 1
+        count += 1
+    print(repeats)
+    return math.lcm(*repeats)
 
 puzzle(20, part1, part2, False, False).run()
