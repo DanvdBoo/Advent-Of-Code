@@ -46,8 +46,8 @@ def part2(s: str):
             print(REMAINING_STEPS[0], len(oddQ))
             fn[0] = len(oddQ)
         elif step == REMAINING_STEPS[1] and fn[1] == 0:
-            print(REMAINING_STEPS[1], len(oddQ))
-            fn[1] = len(oddQ)
+            print(REMAINING_STEPS[1], len(evenQ))
+            fn[1] = len(evenQ)
         elif step == REMAINING_STEPS[2] and fn[2] == 0:
             print(REMAINING_STEPS[2], len(oddQ))
             fn[2] = len(oddQ)
