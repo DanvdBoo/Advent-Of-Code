@@ -17,7 +17,7 @@ def part1(s: str):
             if 0<=rr<len(grid) and 0<=cc<len(grid[0]) and newDirLen <= 3 and ((i+2)%4 != dir_):
                 heapq.heappush(q, (dist + grid[rr][cc], rr, cc, i, newDirLen))
     result = []
-    for (r, c, dir_, dirLen), v in d.items():
+    for (r, c, _, _), v in d.items():
         if r == len(grid) - 1 and c == len(grid[0]) - 1:
             result.append(v)
     return min(result)
@@ -38,7 +38,7 @@ def part2(s: str):
             if 0<=rr<len(grid) and 0<=cc<len(grid[0]) and newDirLen <= 10 and ((i+2)%4 != dir_) and (i == dir_ or dirLen >= 4 or dirLen == -1):
                 heapq.heappush(q, (dist + grid[rr][cc], rr, cc, i, newDirLen))
     result = []
-    for (r, c, dir_, dirLen), v in d.items():
+    for (r, c, _, _), v in d.items():
         if r == len(grid) - 1 and c == len(grid[0]) - 1:
             result.append(v)
     return min(result)

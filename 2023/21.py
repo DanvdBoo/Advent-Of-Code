@@ -34,7 +34,7 @@ def part2(s: str):
     REMAINING_STEPS = [65, 196, 327]
 
     grid = []
-    for i in range(7):
+    for _ in range(7):
         for line in s.splitlines():
             grid.append([char for char in 7 * line])
     q = [(458, 458, 0)]

@@ -1,6 +1,5 @@
 from .boilerPlate2023 import puzzle
 import copy
-import functools
 
 def part1(input: str):
     workflows, parts = input.split('\n\n')
