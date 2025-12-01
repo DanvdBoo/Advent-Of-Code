@@ -1,4 +1,4 @@
-from .boilerPlate2024 import puzzle
+from .boilerPlate2025 import puzzle
 
 def part1(s: str):
     result = s
